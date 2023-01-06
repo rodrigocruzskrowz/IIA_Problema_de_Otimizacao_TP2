@@ -1,9 +1,12 @@
-#include "algoritmo.h"
-
+#define _CRT_SECURE_NO_WARNINGS 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "algoritmo.h"
 #include "utils.h"
+#include "funcao.h"
+
+////TREPA COLINAS START :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 // Gera um vizinho
 // Parametros: solucao actual, vizinho, numero de vertices
@@ -79,8 +82,8 @@ int trepa_colinas(int sol[], int *mat, int vert, int num_iter)
     for(i=0; i<num_iter; i++)
     {
         // Gera vizinho
-        gera_vizinho(sol, nova_sol, vert);
-        //gera_vizinho2(sol, nova_sol, vert);
+//        gera_vizinho(sol, nova_sol, vert);
+        gera_vizinho2(sol, nova_sol, vert);
         // Avalia vizinho
         custo_viz = calcula_fit(nova_sol, mat, vert);
         // Aceita vizinho se o custo diminuir (problema de minimizacao)
@@ -188,3 +191,284 @@ int recristalizacao_simulada(int sol[], int *mat, int vert, int num_iter){
     //Devolve o custo da melhor solução encontrada
     return best_custo;
 }
+
+////TREPA COLINAS END :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+////EVOLUTIVO START :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+// Preenche uma estrutura com os progenitores da pr�xima gera��o, de acordo com o resultados do torneio binario (tamanho de torneio: 2)
+// Par�metros de entrada: popula��o actual (pop), estrutura com par�metros (d) e popula��o de pais a encher
+void tournament_evol(pchrom pop, struct info d, pchrom parents)
+{
+    int i, x1, x2;
+
+    // Realiza popsize torneios
+    for(i=0; i<d.popsize;i++)
+    {
+        x1 = random_l_h_evol(0, d.popsize - 1);
+        do
+            x2 = random_l_h_evol(0, d.popsize - 1);
+        while(x1==x2);
+        if(pop[x1].fitness > pop[x2].fitness)		// Problema de maximizacao
+            parents[i]=pop[x1];
+        else
+            parents[i]=pop[x2];
+    }
+}
+
+// Operadores geneticos a usar na gera��o dos filhos
+// Par�metros de entrada: estrutura com os pais (parents), estrutura com par�metros (d), estrutura que guardar� os descendentes (offspring)
+void genetic_operators_evol(pchrom parents, struct info d, pchrom offspring)
+{
+    // Recombina��o com um ponto de corte
+	crossover_evol(parents, d, offspring);
+    if(contaSolsAllPop(offspring, d) != d.popsize)
+        printf("DIF");
+    //Recombinação com dois pontos de corte
+//    crossover_dois_pontos_corte_evol(parents, d, offspring);
+
+    //Recombinação uniforme
+//    crossover_uniforme_evol(parents, d, offspring);
+
+    // Muta��o bin�ria
+    mutation_evol(offspring, d);
+    if(contaSolsAllPop(offspring, d) != d.popsize)
+        printf("DIF");
+    //Mutação por troca
+//    mutacao_por_troca_evol(offspring,d);
+}
+
+// Preenche o vector descendentes com o resultado das opera��es de recombina��o
+// Par�metros de entrada: estrutura com os pais (parents), estrutura com par�metros (d), estrutura que guardar� os descendentes (offspring)
+void crossover_evol(pchrom parents, struct info d, pchrom offspring)
+{
+    int i, j, point, solucoes, pos1, pos2;
+
+    for (i=0; i<d.popsize; i+=2)
+    {
+        if (rand_01_evol() < d.pr)
+        {
+            point = random_l_h_evol(0, d.numGenes - 1);
+            for (j=0; j<point; j++)
+            {
+                offspring[i].p[j] = parents[i].p[j];
+                offspring[i+1].p[j] = parents[i+1].p[j];
+            }
+            for (j=point; j<d.numGenes; j++)
+            {
+                offspring[i].p[j]= parents[i+1].p[j];
+                offspring[i+1].p[j] = parents[i].p[j];
+            }
+        }
+        else
+        {
+            offspring[i] = parents[i];
+            offspring[i+1] = parents[i+1];
+        }
+
+        //Verifica ksols das solucoes geradas
+        if((solucoes= contaSolsPop(offspring,d,i)) != d.ksols) {
+            repoeKSols(&solucoes, d, offspring, i);
+        }
+        if((solucoes= contaSolsPop(offspring,d,i+1)) != d.ksols) {
+            repoeKSols(&solucoes, d, offspring, i+1);
+        }
+    }
+}
+
+void crossover_dois_pontos_corte_evol(pchrom parents, struct info d, pchrom offspring)
+{
+    int i, j, point1, point2;
+
+    for (i=0; i<d.popsize; i+=2)
+    {
+        if (rand_01_evol() < d.pr)
+        {
+            point1 = random_l_h_evol(0, d.numGenes - 1);
+            point2 = random_l_h_evol(point1 + 1, d.numGenes - 1);
+            for (j=0; j<point1; j++) //Igual aos pais
+            {
+                offspring[i].p[j] = parents[i].p[j];
+                offspring[i+1].p[j] = parents[i+1].p[j];
+            }
+            for (j=point1; j<point2; j++) //Troca
+            {
+                offspring[i].p[j]= parents[i+1].p[j];
+                offspring[i+1].p[j] = parents[i].p[j];
+            }
+            for (j=point2; j<d.numGenes; j++) //Igual aos pais
+            {
+                offspring[i].p[j]= parents[i].p[j];
+                offspring[i+1].p[j] = parents[i+1].p[j];
+            }
+        }
+        else
+        {
+            offspring[i] = parents[i];
+            offspring[i+1] = parents[i+1];
+        }
+    }
+}
+
+void crossover_uniforme_evol(pchrom parents, struct info d, pchrom offspring)
+{
+    int i, j;
+
+    for (i=0; i<d.popsize; i+=2)
+    {
+        if (rand_01_evol() < d.pr)
+        {
+            for(j=0; j<d.numGenes; j++)
+            {
+                if(flip_evol() == 1)
+                {
+                    offspring[i].p[j] = parents[i].p[j];
+                    offspring[i+1].p[j] = parents[i+1].p[j];
+                }
+                else
+                {
+                    offspring[i].p[j] = parents[i+1].p[j];
+                    offspring[i+1].p[j] = parents[i].p[j];
+                }
+            }
+        }
+        else
+        {
+            offspring[i] = parents[i];
+            offspring[i+1] = parents[i+1];
+        }
+    }
+}
+
+// Muta��o bin�ria com v�rios pontos de muta��o
+// Par�metros de entrada: estrutura com os descendentes (offspring) e estrutura com par�metros (d)
+void mutation_evol(pchrom offspring, struct info d)
+{
+//    int i, j, x, posTroca;
+//
+//    for (i=0; i<d.popsize; i++)
+//        for (j=0; j<d.ksols; j++)
+//            if (rand_01_evol() < d.pm){
+//                //remove um no que faz parte da solucao e adiciona um no que não faz parte da solucao
+//                do{
+//                    x = random_l_h_evol(0, d.numGenes - 1);
+//                }while(offspring[i].p[x] != 0);
+//                offspring[i].p[x] = !(offspring[i].p[x]);
+//
+//                posTroca = x;
+//
+//                do{
+//                    x = random_l_h_evol(0, d.numGenes - 1);
+//                }while(offspring[i].p[x] != 1 || x == posTroca);
+//                offspring[i].p[x] = !(offspring[i].p[x]);
+//            }
+
+        int i, j, x, solucoes;
+
+        solucoes = d.ksols;
+        for (i=0; i<d.popsize; i++) {
+            for (j = 0; j < d.ksols; j++) {
+                if (rand_01_evol() < d.pm) {
+                    x = random_l_h_evol(0, d.numGenes - 1);
+                    if(offspring[i].p[x] == 1){
+                        solucoes--;
+                        offspring[i].p[x] = !(offspring[i].p[x]);
+                    }
+                    else if(offspring[i].p[x] == 0){
+                        solucoes++;
+                        offspring[i].p[x] = !(offspring[i].p[x]);
+                    }
+                    if(solucoes < d.ksols){
+                        while(solucoes != d.ksols)
+                        {
+                            x = random_l_h_evol(0, d.numGenes - 1);
+                            if(offspring[i].p[x] == 0) {
+                                offspring[i].p[x] = !(offspring[i].p[x]);
+                                solucoes++;
+                            }
+                        }
+                    }
+                    else if(solucoes > d.ksols){
+                        while(solucoes != d.ksols)
+                        {
+                            x = random_l_h_evol(0, d.numGenes - 1);
+                            if(offspring[i].p[x] == 1) {
+                                offspring[i].p[x] = !(offspring[i].p[x]);
+                                solucoes--;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+//    for (i=0; i<d.popsize; i++)
+//        for (j=0; j<d.numGenes; j++)
+//            if (rand_01_evol() < d.pm)
+//                offspring[i].p[j] = !(offspring[i].p[j]);
+}
+
+void mutacao_por_troca_evol(pchrom offspring, struct info d){
+    int i,pos1,pos2,aux;
+
+    for(i=0;i<d.popsize;i++){
+        if(rand_01_evol() < d.pm){
+            do
+                pos1 = random_l_h_evol(0, d.numGenes - 1);
+            while(offspring[i].p[pos1] == 1);
+            do
+                pos2 = random_l_h_evol(0, d.numGenes - 1);
+            while(offspring[i].p[pos2] == 0);
+            aux = offspring[i].p[pos1] = offspring[i].p[pos2];
+            offspring[i].p[pos2] = aux;
+        }
+    }
+}
+
+void repoeKSols(int *solucoes, struct info d, pchrom offspring, int iter){
+    int point = -1;
+    while(*solucoes != d.ksols) {
+        if (*solucoes < d.ksols) {
+            point = random_l_h_evol(0, d.numGenes - 1);
+            if (offspring[iter].p[point] == 0) {
+                offspring[iter].p[point] = !(offspring[iter].p[point]);
+                (*solucoes)++;
+            }
+        }
+        if (*solucoes > d.ksols) {
+            point = random_l_h_evol(0, d.numGenes - 1);
+            if (offspring[iter].p[point] == 1) {
+                offspring[iter].p[point] = !(offspring[iter].p[point]);
+                (*solucoes)--;
+            }
+        }
+    }
+}
+
+//void repoeKSols(int *solucoes, struct info d, pchrom offspring, int pos1, int pos2, int pontoTroca, int point){
+//    if(pos1 != -1 && pos2 != -1 && pontoTroca != -1 && *solucoes != d.ksols) {
+//        while(*solucoes != d.ksols) {
+//            if (*solucoes < d.ksols) {
+//                do{
+//                    point = random_l_h_evol(0, d.numGenes - 1);
+//                }while(point == pontoTroca);
+//                if (offspring[pos1].p[point] == 0) {
+//                    offspring[pos1].p[point] = !(offspring[pos2].p[point]);
+//                    (*solucoes)++;
+//                }
+//            }
+//            if (*solucoes > d.ksols) {
+//                do{
+//                    point = random_l_h_evol(0, d.numGenes - 1);
+//                }while(point == pontoTroca);
+//                if (offspring[pos1].p[point] == 1) {
+//                    offspring[pos1].p[point] = !(offspring[pos2].p[point]);
+//                    (*solucoes)--;
+//                }
+//            }
+//        }
+//    }
+//}
+
+////EVOLUTIVO END :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
