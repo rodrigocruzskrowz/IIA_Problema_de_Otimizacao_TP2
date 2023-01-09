@@ -14,6 +14,7 @@ int trepa_colinas_viz2(int sol[], int *mat, int vert, int num_iter);
 int trepa_colinas_probabilistico(int sol[], int *mat, int vert, int num_iter);
 int recristalizacao_simulada(int sol[], int *mat, int vert, int num_iter);
 
+
 ////EVOLUTIVO
 // EStrutura para armazenar parametros
 struct info
@@ -52,6 +53,10 @@ struct individual
 
 void tournament_evol(pchrom pop, struct info d, pchrom parents);
 void genetic_operators_evol(pchrom parents, struct info d, pchrom offspring);
+void genetic_operators_evol_1pcortebin(pchrom parents, struct info d, pchrom offspring);
+void genetic_operators_evol_1pcortetroca(pchrom parents, struct info d, pchrom offspring);
+void genetic_operators_evol_2pcortebin(pchrom parents, struct info d, pchrom offspring);
+void genetic_operators_evol_2pcortetroca(pchrom parents, struct info d, pchrom offspring);
 void crossover_evol(pchrom parents, struct info d, pchrom offspring);
 void crossover_dois_pontos_corte_evol(pchrom parents, struct info d, pchrom offspring);
 void crossover_uniforme_evol(pchrom parents, struct info d, pchrom offspring);
