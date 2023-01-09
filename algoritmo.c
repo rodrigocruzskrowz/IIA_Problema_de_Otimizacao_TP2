@@ -21,7 +21,7 @@ void gera_vizinho(int a[], int b[], int n)
     do
         p1=random_l_h(0, n-1);
     while(b[p1] != 0);
-    // Encontra posicao com valor 0
+    // Encontra posicao com valor 1
     do
         p2=random_l_h(0, n-1);
     while(b[p2] != 1);
@@ -82,12 +82,70 @@ int trepa_colinas(int sol[], int *mat, int vert, int num_iter)
     for(i=0; i<num_iter; i++)
     {
         // Gera vizinho
-//        gera_vizinho(sol, nova_sol, vert);
+        gera_vizinho(sol, nova_sol, vert);
+//        gera_vizinho2(sol, nova_sol, vert);
+        // Avalia vizinho
+        custo_viz = calcula_fit(nova_sol, mat, vert);
+        // Aceita vizinho se o custo diminuir (problema de minimizacao)
+        if(custo_viz >= custo)
+        {
+            substitui(sol, nova_sol, vert);
+            custo = custo_viz;
+        }
+    }
+    free(nova_sol);
+    return custo;
+}
+
+int trepa_colinas_viz1(int sol[], int *mat, int vert, int num_iter)
+{
+    int *nova_sol, custo, custo_viz, i;
+
+    nova_sol = malloc(sizeof(int)*vert);
+    if(nova_sol == NULL)
+    {
+        printf("Erro na alocacao de memoria");
+        exit(1);
+    }
+    // Avalia solucao inicial
+    custo = calcula_fit(sol, mat, vert);
+    for(i=0; i<num_iter; i++)
+    {
+        // Gera vizinho
+        gera_vizinho(sol, nova_sol, vert);
+        // Avalia vizinho
+        custo_viz = calcula_fit(nova_sol, mat, vert);
+        // Aceita vizinho se o custo diminuir (problema de minimizacao)
+        if(custo_viz >= custo)
+        {
+            substitui(sol, nova_sol, vert);
+            custo = custo_viz;
+        }
+    }
+    free(nova_sol);
+    return custo;
+}
+
+int trepa_colinas_viz2(int sol[], int *mat, int vert, int num_iter)
+{
+    int *nova_sol, custo, custo_viz, i;
+
+    nova_sol = malloc(sizeof(int)*vert);
+    if(nova_sol == NULL)
+    {
+        printf("Erro na alocacao de memoria");
+        exit(1);
+    }
+    // Avalia solucao inicial
+    custo = calcula_fit(sol, mat, vert);
+    for(i=0; i<num_iter; i++)
+    {
+        // Gera vizinho
         gera_vizinho2(sol, nova_sol, vert);
         // Avalia vizinho
         custo_viz = calcula_fit(nova_sol, mat, vert);
         // Aceita vizinho se o custo diminuir (problema de minimizacao)
-        if(custo_viz < custo)
+        if(custo_viz >= custo)
         {
             substitui(sol, nova_sol, vert);
             custo = custo_viz;
@@ -112,7 +170,79 @@ int trepa_colinas_probabilistico(int sol[], int *mat, int vert, int num_iter)
     for(i=0; i<num_iter; i++)
     {
         // Gera vizinho
-//        gera_vizinho(sol, nova_sol, vert);
+        gera_vizinho(sol, nova_sol, vert);
+//        gera_vizinho2(sol, nova_sol, vert);
+        // Avalia vizinho
+        custo_viz = calcula_fit(nova_sol, mat, vert);
+        // Aceita vizinho se o custo diminuir (problema de minimizacao)
+        if(custo_viz >= custo)
+        {
+            substitui(sol, nova_sol, vert);
+            custo = custo_viz;
+        }
+        else{
+            if(rand_01() < PROB)
+            {
+                substitui(sol,nova_sol,vert);
+                custo = custo_viz;
+            }
+        }
+    }
+    free(nova_sol);
+    return custo;
+}
+
+int trepa_colinas_probabilistico_viz1(int sol[], int *mat, int vert, int num_iter)
+{
+    int *nova_sol, custo, custo_viz, i;
+
+    nova_sol = malloc(sizeof(int)*vert);
+    if(nova_sol == NULL)
+    {
+        printf("Erro na alocacao de memoria");
+        exit(1);
+    }
+    // Avalia solucao inicial
+    custo = calcula_fit(sol, mat, vert);
+    for(i=0; i<num_iter; i++)
+    {
+        // Gera vizinho
+        gera_vizinho(sol, nova_sol, vert);
+        // Avalia vizinho
+        custo_viz = calcula_fit(nova_sol, mat, vert);
+        // Aceita vizinho se o custo diminuir (problema de minimizacao)
+        if(custo_viz >= custo)
+        {
+            substitui(sol, nova_sol, vert);
+            custo = custo_viz;
+        }
+        else{
+            if(rand_01() < PROB)
+            {
+                substitui(sol,nova_sol,vert);
+                custo = custo_viz;
+            }
+        }
+    }
+    free(nova_sol);
+    return custo;
+}
+
+int trepa_colinas_probabilistico_viz2(int sol[], int *mat, int vert, int num_iter)
+{
+    int *nova_sol, custo, custo_viz, i;
+
+    nova_sol = malloc(sizeof(int)*vert);
+    if(nova_sol == NULL)
+    {
+        printf("Erro na alocacao de memoria");
+        exit(1);
+    }
+    // Avalia solucao inicial
+    custo = calcula_fit(sol, mat, vert);
+    for(i=0; i<num_iter; i++)
+    {
+        // Gera vizinho
         gera_vizinho2(sol, nova_sol, vert);
         // Avalia vizinho
         custo_viz = calcula_fit(nova_sol, mat, vert);
@@ -220,29 +350,72 @@ void tournament_evol(pchrom pop, struct info d, pchrom parents)
 // Par�metros de entrada: estrutura com os pais (parents), estrutura com par�metros (d), estrutura que guardar� os descendentes (offspring)
 void genetic_operators_evol(pchrom parents, struct info d, pchrom offspring)
 {
+    ////ALGORITMO EVOLUTIVO - Recombinação com 1 ponto de corte + Mutação binária
     // Recombina��o com um ponto de corte
-	crossover_evol(parents, d, offspring);
-    if(contaSolsAllPop(offspring, d) != d.popsize)
-        printf("DIF");
+//	crossover_evol(parents, d, offspring);
+//    if(contaSolsAllPop(offspring, d) != d.popsize)
+//        printf("DIF");
+
     //Recombinação com dois pontos de corte
-//    crossover_dois_pontos_corte_evol(parents, d, offspring);
+    crossover_dois_pontos_corte_evol(parents, d, offspring);
 
     //Recombinação uniforme
 //    crossover_uniforme_evol(parents, d, offspring);
 
     // Muta��o bin�ria
     mutation_evol(offspring, d);
-    if(contaSolsAllPop(offspring, d) != d.popsize)
-        printf("DIF");
+//    if(contaSolsAllPop(offspring, d) != d.popsize)
+//        printf("DIF");
+
     //Mutação por troca
 //    mutacao_por_troca_evol(offspring,d);
+}
+
+void genetic_operators_evol_1pcortebin(pchrom parents, struct info d, pchrom offspring)
+{
+    ////ALGORITMO EVOLUTIVO - Recombinação com 1 ponto de corte + Mutação binária
+    // Recombina��o com um ponto de corte
+    crossover_evol(parents, d, offspring);
+
+    // Muta��o bin�ria
+    mutation_evol(offspring, d);
+}
+
+void genetic_operators_evol_1pcortetroca(pchrom parents, struct info d, pchrom offspring)
+{
+    ////ALGORITMO EVOLUTIVO - Recombinação com 1 ponto de corte + Mutação por troca
+    // Recombina��o com um ponto de corte
+	crossover_evol(parents, d, offspring);
+
+    //Mutação por troca
+    mutacao_por_troca_evol(offspring,d);
+}
+
+void genetic_operators_evol_2pcortebin(pchrom parents, struct info d, pchrom offspring)
+{
+    ////ALGORITMO EVOLUTIVO - Recombinação com 2 ponto de corte + Mutação binária
+    //Recombinação com dois pontos de corte
+    crossover_dois_pontos_corte_evol(parents, d, offspring);
+
+    // Muta��o bin�ria
+    mutation_evol(offspring, d);
+}
+
+void genetic_operators_evol_2pcortetroca(pchrom parents, struct info d, pchrom offspring)
+{
+    ////ALGORITMO EVOLUTIVO - Recombinação com 2 pontos de corte + Mutação por troca
+    //Recombinação com dois pontos de corte
+    crossover_dois_pontos_corte_evol(parents, d, offspring);
+
+    //Mutação por troca
+    mutacao_por_troca_evol(offspring,d);
 }
 
 // Preenche o vector descendentes com o resultado das opera��es de recombina��o
 // Par�metros de entrada: estrutura com os pais (parents), estrutura com par�metros (d), estrutura que guardar� os descendentes (offspring)
 void crossover_evol(pchrom parents, struct info d, pchrom offspring)
 {
-    int i, j, point, solucoes, pos1, pos2;
+    int i, j, point, solucoes;
 
     for (i=0; i<d.popsize; i+=2)
     {
@@ -278,14 +451,14 @@ void crossover_evol(pchrom parents, struct info d, pchrom offspring)
 
 void crossover_dois_pontos_corte_evol(pchrom parents, struct info d, pchrom offspring)
 {
-    int i, j, point1, point2;
+    int i, j, point1, point2, solucoes;
 
     for (i=0; i<d.popsize; i+=2)
     {
         if (rand_01_evol() < d.pr)
         {
             point1 = random_l_h_evol(0, d.numGenes - 1);
-            point2 = random_l_h_evol(point1 + 1, d.numGenes - 1);
+            point2 = random_l_h_evol(point1, d.numGenes - 1);
             for (j=0; j<point1; j++) //Igual aos pais
             {
                 offspring[i].p[j] = parents[i].p[j];
@@ -306,6 +479,14 @@ void crossover_dois_pontos_corte_evol(pchrom parents, struct info d, pchrom offs
         {
             offspring[i] = parents[i];
             offspring[i+1] = parents[i+1];
+        }
+
+        //Verifica ksols das solucoes geradas
+        if((solucoes= contaSolsPop(offspring,d,i)) != d.ksols) {
+            repoeKSols(&solucoes, d, offspring, i);
+        }
+        if((solucoes= contaSolsPop(offspring,d,i+1)) != d.ksols) {
+            repoeKSols(&solucoes, d, offspring, i+1);
         }
     }
 }
@@ -344,69 +525,44 @@ void crossover_uniforme_evol(pchrom parents, struct info d, pchrom offspring)
 // Par�metros de entrada: estrutura com os descendentes (offspring) e estrutura com par�metros (d)
 void mutation_evol(pchrom offspring, struct info d)
 {
-//    int i, j, x, posTroca;
-//
-//    for (i=0; i<d.popsize; i++)
-//        for (j=0; j<d.ksols; j++)
-//            if (rand_01_evol() < d.pm){
-//                //remove um no que faz parte da solucao e adiciona um no que não faz parte da solucao
-//                do{
-//                    x = random_l_h_evol(0, d.numGenes - 1);
-//                }while(offspring[i].p[x] != 0);
-//                offspring[i].p[x] = !(offspring[i].p[x]);
-//
-//                posTroca = x;
-//
-//                do{
-//                    x = random_l_h_evol(0, d.numGenes - 1);
-//                }while(offspring[i].p[x] != 1 || x == posTroca);
-//                offspring[i].p[x] = !(offspring[i].p[x]);
-//            }
+    int i, j, x, solucoes;
 
-        int i, j, x, solucoes;
-
-        solucoes = d.ksols;
-        for (i=0; i<d.popsize; i++) {
-            for (j = 0; j < d.ksols; j++) {
-                if (rand_01_evol() < d.pm) {
-                    x = random_l_h_evol(0, d.numGenes - 1);
-                    if(offspring[i].p[x] == 1){
-                        solucoes--;
-                        offspring[i].p[x] = !(offspring[i].p[x]);
-                    }
-                    else if(offspring[i].p[x] == 0){
-                        solucoes++;
-                        offspring[i].p[x] = !(offspring[i].p[x]);
-                    }
-                    if(solucoes < d.ksols){
-                        while(solucoes != d.ksols)
-                        {
-                            x = random_l_h_evol(0, d.numGenes - 1);
-                            if(offspring[i].p[x] == 0) {
-                                offspring[i].p[x] = !(offspring[i].p[x]);
-                                solucoes++;
-                            }
+    solucoes = d.ksols;
+    for (i=0; i<d.popsize; i++) {
+        for (j = 0; j < d.ksols; j++) {
+            if (rand_01_evol() < d.pm) {
+                x = random_l_h_evol(0, d.numGenes - 1);
+                if(offspring[i].p[x] == 1){
+                    solucoes--;
+                    offspring[i].p[x] = !(offspring[i].p[x]);
+                }
+                else if(offspring[i].p[x] == 0){
+                    solucoes++;
+                    offspring[i].p[x] = !(offspring[i].p[x]);
+                }
+                if(solucoes < d.ksols){
+                    while(solucoes != d.ksols)
+                    {
+                        x = random_l_h_evol(0, d.numGenes - 1);
+                        if(offspring[i].p[x] == 0) {
+                            offspring[i].p[x] = !(offspring[i].p[x]);
+                            solucoes++;
                         }
                     }
-                    else if(solucoes > d.ksols){
-                        while(solucoes != d.ksols)
-                        {
-                            x = random_l_h_evol(0, d.numGenes - 1);
-                            if(offspring[i].p[x] == 1) {
-                                offspring[i].p[x] = !(offspring[i].p[x]);
-                                solucoes--;
-                            }
+                }
+                else if(solucoes > d.ksols){
+                    while(solucoes != d.ksols)
+                    {
+                        x = random_l_h_evol(0, d.numGenes - 1);
+                        if(offspring[i].p[x] == 1) {
+                            offspring[i].p[x] = !(offspring[i].p[x]);
+                            solucoes--;
                         }
                     }
                 }
             }
         }
-
-
-//    for (i=0; i<d.popsize; i++)
-//        for (j=0; j<d.numGenes; j++)
-//            if (rand_01_evol() < d.pm)
-//                offspring[i].p[j] = !(offspring[i].p[j]);
+    }
 }
 
 void mutacao_por_troca_evol(pchrom offspring, struct info d){
@@ -420,7 +576,8 @@ void mutacao_por_troca_evol(pchrom offspring, struct info d){
             do
                 pos2 = random_l_h_evol(0, d.numGenes - 1);
             while(offspring[i].p[pos2] == 0);
-            aux = offspring[i].p[pos1] = offspring[i].p[pos2];
+            aux = offspring[i].p[pos1];
+            offspring[i].p[pos1] = offspring[i].p[pos2];
             offspring[i].p[pos2] = aux;
         }
     }
