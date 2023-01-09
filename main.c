@@ -10,6 +10,8 @@
 
 int main(int argc, char *argv[])
 {
+    int num_iter = 100;
+
     int opc = 1;
     while(opc != 0) {
         printf("\n\n::: ALGORITMOS :::\n");
@@ -82,7 +84,7 @@ int main(int argc, char *argv[])
                     escreve_sol(sol, vert, k);
                     // Trepa colinas
 //                    custo = trepa_colinas(sol, grafo, vert, vert);
-		            custo = trepa_colinas_viz1(sol, grafo, vert, vert);
+		            custo = trepa_colinas_viz1(sol, grafo, vert, num_iter);
 //                    custo = recristalizacao_simulada(sol, grafo, vert, vert);
                     // Escreve resultados da repeticao i
                     printf("\nRepeticao %d:", i);
@@ -100,7 +102,7 @@ int main(int argc, char *argv[])
                 printf("\nMelhor solucao encontrada");
                 escreve_sol(best, vert, k);
                 printf("Custo final: %2d\n\n", best_custo);
-                logtofile(vert,best_custo,mbf/i);
+                logtofile(num_iter,best_custo,mbf/i);
                 free(grafo);
                 free(sol);
                 free(best);
@@ -160,7 +162,7 @@ int main(int argc, char *argv[])
                     escreve_sol(sol, vert, k);
                     // Trepa colinas
 //                    custo = trepa_colinas(sol, grafo, vert, vert);
-                    custo = trepa_colinas_viz2(sol, grafo, vert, vert);
+                    custo = trepa_colinas_viz2(sol, grafo, vert, num_iter);
 //                    custo = recristalizacao_simulada(sol, grafo, vert, vert);
                     // Escreve resultados da repeticao i
                     printf("\nRepeticao %d:", i);
@@ -178,7 +180,7 @@ int main(int argc, char *argv[])
                 printf("\nMelhor solucao encontrada");
                 escreve_sol(best, vert, k);
                 printf("Custo final: %2d\n\n", best_custo);
-                logtofile(vert,best_custo,mbf/i);
+                logtofile(num_iter,best_custo,mbf/i);
                 free(grafo);
                 free(sol);
                 free(best);
