@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
                 init_rand();
                 // Preenche matriz de adjacencias
                 grafo = init_dados(nome_fich,&k,&vert,&arest);
-                mostra_matriz(grafo, vert);
+//                mostra_matriz(grafo, vert);
                 sol = malloc(sizeof(int)*vert);
                 best = malloc(sizeof(int)*vert);
                 if(sol == NULL || best == NULL)
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
                 init_rand();
                 // Preenche matriz de adjacencias
                 grafo = init_dados(nome_fich,&k,&vert,&arest);
-                mostra_matriz(grafo, vert);
+//                mostra_matriz(grafo, vert);
                 sol = malloc(sizeof(int)*vert);
                 best = malloc(sizeof(int)*vert);
                 if(sol == NULL || best == NULL)
