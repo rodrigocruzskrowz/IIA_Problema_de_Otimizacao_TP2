@@ -59,6 +59,9 @@ int main(int argc, char *argv[])
                     fflush(stdin);
                     gets(nome_fich);
 
+                    printf("Número de iterações: ");
+                    scanf("%d", &num_iter);
+
                     printf("Número de runs: ");
                     scanf("%d", &runs);
                 }
@@ -136,6 +139,9 @@ int main(int argc, char *argv[])
                     printf("\nNome do Ficheiro: ");
                     fflush(stdin);
                     gets(nome_fich);
+
+                    printf("Número de iterações: ");
+                    scanf("%d", &num_iter);
 
                     printf("Número de runs: ");
                     scanf("%d", &runs);
