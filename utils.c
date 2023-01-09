@@ -293,3 +293,18 @@ int contaSolsPop(pchrom pop, struct info d, int iter){
 
     return nsols;
 }
+
+void logtofile(int num_iter,int best ,float mbf){
+    FILE *out = fopen("output.txt", "a");
+
+    fprintf(out, "%d\t%d\t%.2f\n",num_iter,best,mbf);
+    fclose(out);
+}
+
+void logtofile_evol(chrom b, struct  info x,float mbf){
+    FILE *out = fopen("output.txt", "a");
+
+
+    fprintf(out, "%4.1f\t%.2f\t%d\t%.3f\t%.4f\t%d\t%d\t%d\n",b.fitness,mbf, x.popsize,	x.pr,x.pm,x.tsize,x.numGenerations,x.numGenes);
+    fclose(out);
+}

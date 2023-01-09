@@ -25,4 +25,7 @@ int flip_evol();
 int contaSolsAllPop(pchrom pop, struct info d);
 int contaSolsPop(pchrom pop, struct info d, int iter);
 
+void logtofile(int num_iter,int best ,float mbf);
+void logtofile_evol(chrom b, struct  info x,float mbf);
+
 #endif //TP2_UTILS_H
