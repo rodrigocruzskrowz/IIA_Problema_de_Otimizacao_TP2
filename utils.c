@@ -164,11 +164,22 @@ struct info init_data_evol(char *filename, int *mat)
 
     fclose(f);
 
-    x.popsize = 100;
-    x.pm = 1;
-    x.pr = 0.3;
-    x.tsize = 2;
-    x.numGenerations = 2500;
+//    x.popsize = 100;
+//    x.pm = 0.01;
+//    x.pr = 0.7;
+//    x.tsize = 2;
+//    x.numGenerations = 2500;
+
+    printf("Popsize: ");
+    scanf("%d", &x.popsize);
+    printf("Pm: ");
+    scanf("%f", &x.pm);
+    printf("Pr: ");
+    scanf("%f", &x.pr);
+    printf("Generations: ");
+    scanf("%d", &x.numGenerations);
+    printf("TSize: ");
+    scanf("%d", &x.tsize);
 
     // Devolve a estrutura com os par�metros
     return x;

@@ -346,6 +346,38 @@ void tournament_evol(pchrom pop, struct info d, pchrom parents)
     }
 }
 
+void tournament_evol_geral(pchrom pop, struct info d, pchrom parents)
+{
+    int i, j, k, sair, best, *pos;
+
+    pos = malloc(d.tsize*sizeof(int));
+    // Realiza popsize torneios
+    for(i=0; i<d.popsize;i++)
+    {
+        // Seleciona tsize solu��es diferentes para entrarem em torneio de sele��o
+        for(j=0; j<d.tsize; j++)
+        {
+            do
+            {
+                pos[j] = random_l_h(0, d.popsize-1);
+                // Verifica se a nova posi��o escolhida � igual a alguma das outras posi��es escolhidas
+                sair = 0;
+                for (k=0; k<j; k++)
+                {
+                    if (pos[k]==pos[j])
+                        sair = 1;
+                }
+            }
+            while (sair);
+            // Guarda a posi��o da melhor solu��o de todas as que entraram em torneio
+            if (j==0 || pop[pos[j]].fitness > pop[pos[best]].fitness)
+                best = j;
+        }
+        parents[i] = pop[pos[best]];
+    }
+    free(pos);
+}
+
 // Operadores geneticos a usar na gera��o dos filhos
 // Par�metros de entrada: estrutura com os pais (parents), estrutura com par�metros (d), estrutura que guardar� os descendentes (offspring)
 void genetic_operators_evol(pchrom parents, struct info d, pchrom offspring)

@@ -222,6 +222,47 @@ void gera_vizinho_evol(int sol[], int solViz[], int *mat, int nGenes)
     }
 }
 
+void gera_vizinho2_evol(int sol[], int solViz[], int *mat, int nGenes)
+{
+    int i, p1,p2,p3,p4;
+
+    //Copia a solução para a solução vizinha
+    for (i = 0; i < nGenes; i++)
+        solViz[i] = sol[i];
+
+    //POBGERAVIZ de vezes uma solução vizinha é obtida com a troca do estado de um objeto
+    if(rand_01_evol() < PROBGERAVIZ)
+    {
+        //remove um no que faz parte da solucao e adiciona um no que não faz parte da solucao
+        do{
+            p1 = random_l_h_evol(0, nGenes - 1);
+        }while(solViz[p1] != 0);
+
+        do{
+            p2 = random_l_h_evol(0, nGenes - 1);
+        }while(solViz[p2] != 1 );
+
+        // Troca
+        solViz[p1] = 1;
+        solViz[p2] = 0;
+
+        //Volta a encontrar outro no nas mesmas condições
+        do{
+            p3 = random_l_h_evol(0,nGenes-1);
+        }while(solViz[p3] != 0 || p3 == p2);
+
+        //Encontra aleatoriamente a posição de um nó, que não seja igual a p1
+        do{
+            p4 = random_l_h_evol(0,nGenes-1);
+        }while(solViz[p4] != 1 || p4 == p1);
+
+        //Troca os valores dos nós nas posições encontradas
+        solViz[p3] = 1;
+        solViz[p4] = 0;
+
+    }
+}
+
 void trepa_colinas_evol(pchrom pop, struct info d, int *mat)
 {
     int i,j;

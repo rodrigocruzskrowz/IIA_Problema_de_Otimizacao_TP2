@@ -52,6 +52,7 @@ struct individual
 };
 
 void tournament_evol(pchrom pop, struct info d, pchrom parents);
+void tournament_evol_geral(pchrom pop, struct info d, pchrom parents);
 void genetic_operators_evol(pchrom parents, struct info d, pchrom offspring);
 void genetic_operators_evol_1pcortebin(pchrom parents, struct info d, pchrom offspring);
 void genetic_operators_evol_1pcortetroca(pchrom parents, struct info d, pchrom offspring);
